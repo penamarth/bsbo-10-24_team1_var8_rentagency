@@ -1,2 +1,13 @@
 .obsidian/
 docs/
+app.db
+*.db-shm
+*.db-wal
+
+# build and runtime artifacts
+bin/
+obj/
+App_Data/
+.tmp/
+.cortexkit/
+*.user
