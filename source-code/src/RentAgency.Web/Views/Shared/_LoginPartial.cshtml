@@ -1,0 +1,23 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using RentAgency.Web.Features.Accounts
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="auth-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <span class="auth-name">@User.Identity?.Name</span>
+    @if (!User.IsInRole(UserRoles.Owner) && !User.IsInRole(UserRoles.Moderator))
+    {
+        <a class="link-quiet" asp-controller="Account" asp-action="BecomeOwner">Стать арендодателем</a>
+    }
+    <form asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="link-button">Выйти</button>
+    </form>
+}
+else
+{
+    <a class="link-quiet" asp-controller="Account" asp-action="Login">Вход</a>
+    <a class="button button-small" asp-controller="Account" asp-action="Register">Регистрация</a>
+}
+</div>

@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Стать арендодателем";
+    var isOwner = ViewData["IsOwner"] is true;
+}
+
+<h1>Стать арендодателем</h1>
+
+@if (isOwner)
+{
+    <p>У вас уже есть возможность размещать объявления.</p>
+}
+else
+{
+    <p>Чтобы размещать объявления, включите для своего аккаунта возможность арендодателя.</p>
+
+    <form asp-action="BecomeOwner" method="post">
+        <button type="submit" class="btn btn-primary">Включить возможность</button>
+    </form>
+}
