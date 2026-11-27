@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Дизайн-система";
+    var colors = new[]
+    {
+        ("--paper", "Фон страницы"), ("--surface", "Поверхность, карточки"),
+        ("--ink", "Основной текст"), ("--muted", "Вторичный текст"),
+        ("--line", "Границы"), ("--accent", "Акцент"),
+        ("--accent-soft", "Акцент, фон"), ("--accent-ink", "Акцент, текст"),
+        ("--success-bg", "Успех, фон"), ("--success-ink", "Успех, текст"),
+        ("--warn-bg", "Внимание, фон"), ("--warn-ink", "Внимание, текст"),
+        ("--error-bg", "Ошибка, фон"), ("--error-ink", "Ошибка, текст"),
+        ("--done-bg", "Завершено, фон"), ("--done-ink", "Завершено, текст")
+    };
+    var requests = new[]
+    {
+        (RentAgency.Web.Features.Rentals.Domain.RequestStatus.New, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Rentals.Domain.RequestStatus.New)),
+        (RentAgency.Web.Features.Rentals.Domain.RequestStatus.InDiscussion, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Rentals.Domain.RequestStatus.InDiscussion)),
+        (RentAgency.Web.Features.Rentals.Domain.RequestStatus.Rejected, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Rentals.Domain.RequestStatus.Rejected)),
+        (RentAgency.Web.Features.Rentals.Domain.RequestStatus.Rented, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Rentals.Domain.RequestStatus.Rented))
+    };
+    var complaints = new[]
+    {
+        (RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.Open, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.Open)),
+        (RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.AwaitingReporter, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.AwaitingReporter)),
+        (RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.Resolved, RentAgency.Web.Infrastructure.StatusBadge.For(RentAgency.Web.Features.Complaints.Domain.ComplaintStatus.Resolved))
+    };
+}
+
+<h1>Дизайн-система «нахлебная крыша»</h1>
+<p class="muted">Живой справочник: все примеры собраны из реальных классов приложения. Доступна только в Development.</p>
+
+<section class="card ds-section">
+    <h2>Бренд</h2>
+    <div class="ds-row">
+        <span class="brand"><span class="roof" aria-hidden="true"></span><span class="brand-name">нахлебная крыша</span></span>
+        <span class="muted">Словомарка в нижнем регистре + CSS-крыша (без SVG). Один акцент — терракота.</span>
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Цвета</h2>
+    <div class="ds-grid">
+        @foreach (var (token, label) in colors)
+        {
+            <div class="ds-swatch">
+                <span class="ds-swatch-color" style="background: var(@token); border: 1px solid var(--line)"></span>
+                <span class="ds-swatch-token">@token</span>
+                <span class="ds-swatch-label">@label</span>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Типографика</h2>
+    <h1>Заголовок страницы · h1</h1>
+    <h2>Заголовок раздела · h2</h2>
+    <h3>Подзаголовок · h3</h3>
+    <p>Основной текст. Светлая квартира рядом с метро, длительная аренда.</p>
+    <p class="muted">Вторичный текст: даты, подписи, пояснения.</p>
+    <div class="price-line">50 000 ₽ <small>в месяц</small></div>
+</section>
+
+<section class="card ds-section">
+    <h2>Кнопки</h2>
+    <div class="ds-row">
+        <button class="button" type="button">Основное действие</button>
+        <button class="button button-secondary" type="button">Вторичное</button>
+        <button class="button button-danger" type="button">Опасное</button>
+        <button class="button" type="button" disabled>Недоступно</button>
+        <button class="link-button" type="button">Текстовая кнопка</button>
+        <a class="button button-small" asp-controller="Home" asp-action="Index">Компактная</a>
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Статусы</h2>
+    <h3>Объявления</h3>
+    <div class="ds-row">
+        @foreach (var status in Enum.GetValues<RentAgency.Web.Features.Housing.Domain.ListingStatus>())
+        {
+            <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(status)">@status.ToRussian()</span>
+        }
+    </div>
+    <h3>Заявки</h3>
+    <div class="ds-row">
+        @foreach (var (status, badge) in requests)
+        {
+            <span class="badge @badge">@status.ToRussian()</span>
+        }
+    </div>
+    <h3>Жалобы</h3>
+    <div class="ds-row">
+        @foreach (var (status, badge) in complaints)
+        {
+            <span class="badge @badge">@status.ToRussian()</span>
+        }
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Поля формы</h2>
+    <div class="field">
+        <label>Обычное поле</label>
+        <input type="text" placeholder="Район или адрес" />
+    </div>
+    <div class="field">
+        <label>Поле с ошибкой</label>
+        <input type="text" class="input-error" value="Некорректное значение" />
+        <span class="validation">Укажите адрес в формате «улица, дом».</span>
+    </div>
+    <div class="field">
+        <label>Выбор</label>
+        <select><option>Одобрить</option><option>Вернуть на доработку</option></select>
+    </div>
+    <div class="field">
+        <label>Многострочное</label>
+        <textarea placeholder="Описание"></textarea>
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Уведомления</h2>
+    <div class="alert alert-success" role="status">Условия согласованы обеими сторонами.</div>
+    <div class="alert alert-error" role="alert">Объявление недоступно для отклика.</div>
+</section>
+
+<section class="card ds-section">
+    <h2>Пустое состояние</h2>
+    <partial name="_EmptyState" model='("Подходящих объявлений пока нет.", "Найти жильё", "Home", "Index")' />
+</section>
+
+<section class="card ds-section">
+    <h2>Карточка объявления</h2>
+    <div class="grid-cards">
+        <a class="listing-card" asp-controller="Home" asp-action="Index">
+            <span class="listing-card-media is-empty"></span>
+            <span class="listing-card-body">
+                <span class="listing-price">@string.Format("{0:N0}", 50000) ₽ <small class="listing-meta">в месяц</small></span>
+                <span class="listing-address">Тестовая улица, 1</span>
+                <span class="listing-meta">2 комн. · 45 м² · с 01.01.2027</span>
+            </span>
+        </a>
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Таблица</h2>
+    <div class="table-wrap" role="region" aria-label="Пример таблицы" tabindex="0">
+        <table>
+            <thead><tr><th>Жильё</th><th>Статус</th><th>Создана</th><th></th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Тестовая улица, 1</td>
+                    <td><span class="badge badge--accent">На модерации</span></td>
+                    <td>27.11.2026 17:26</td>
+                    <td><a href="#">Открыть</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card ds-section">
+    <h2>Переписка</h2>
+    <div class="message-list">
+        <div class="message"><div class="message-meta">Арендатор · 27.11.2026 12:00</div><div>Когда можно посмотреть квартиру?</div></div>
+        <div class="message message-mine"><div class="message-meta">Вы · 27.11.2026 12:05</div><div>В субботу после 14:00.</div></div>
+    </div>
+    <ul class="history">
+        <li><strong>Одобрено</strong> · 27.11.2026 10:00 <div class="muted">Всё в порядке</div></li>
+        <li><strong>На доработку</strong> · 26.11.2026 09:00 <div class="muted">Нет фото кухни</div></li>
+    </ul>
+</section>
