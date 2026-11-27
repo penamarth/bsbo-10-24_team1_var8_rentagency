@@ -1,0 +1,64 @@
+set shell := ["bash", "-uc"]
+
+home := env_var("HOME")
+local_dotnet := home / ".dotnet" / "dotnet"
+dotnet := if path_exists(local_dotnet) == "true" { local_dotnet } else { "dotnet" }
+
+solution := "RentAgency.sln"
+tests := "tests/RentAgency.Tests/RentAgency.Tests.csproj"
+web := "src/RentAgency.Web/RentAgency.Web.csproj"
+
+# List available recipes
+default:
+    @just --list
+
+# Restore NuGet packages
+restore:
+    {{dotnet}} restore {{solution}}
+
+# Build the solution
+build:
+    {{dotnet}} build {{solution}}
+
+# Run the full test suite
+test:
+    {{dotnet}} test {{tests}}
+
+# Run tests matching a filter, e.g. `just test-filter Rentals`
+test-filter filter:
+    {{dotnet}} test {{tests}} --filter "{{filter}}"
+
+# Run the web application; extra arguments are passed to `dotnet run`
+run *args:
+    {{dotnet}} run --project {{web}} {{args}}
+
+# Run the web application with hot reload
+watch:
+    {{dotnet}} watch --project {{web}} run
+
+# Add an EF Core migration, e.g. `just migrate AddRentalIndexes`
+migrate name:
+    {{dotnet}} ef migrations add {{name}} --project src/RentAgency.Web --startup-project src/RentAgency.Web --output-dir Data/Migrations
+
+# Remove the last EF Core migration
+migrate-remove:
+    {{dotnet}} ef migrations remove --project src/RentAgency.Web --startup-project src/RentAgency.Web
+
+# Delete the local SQLite database; migrations re-run on next start
+db-reset:
+    rm -f src/RentAgency.Web/app.db src/RentAgency.Web/app.db-shm src/RentAgency.Web/app.db-wal
+    @echo "app.db removed; it will be recreated and migrated on the next run"
+
+# Configure the moderator account (not stored in source control)
+moderator email password name="Модератор":
+    {{dotnet}} user-secrets set "Identity:Moderator:Email" "{{email}}" --project {{web}}
+    {{dotnet}} user-secrets set "Identity:Moderator:Password" "{{password}}" --project {{web}}
+    {{dotnet}} user-secrets set "Identity:Moderator:Name" "{{name}}" --project {{web}}
+
+# Format C# sources
+fmt:
+    {{dotnet}} format {{solution}}
+
+# Remove build artifacts
+clean:
+    {{dotnet}} clean {{solution}}
