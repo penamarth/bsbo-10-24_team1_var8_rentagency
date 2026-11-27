@@ -1,0 +1,66 @@
+@model ComplaintDetailsPageViewModel
+@{
+    ViewData["Title"] = "Жалоба";
+    var complaint = Model.Complaint;
+}
+
+<a class="link-quiet" asp-controller="Complaints" asp-action="Index">← Мои жалобы</a>
+
+<div class="section-head" style="margin-top:0.8rem">
+    <h1 style="margin:0">Жалоба</h1>
+    <span class="badge">@complaint.Status.ToRussian()</span>
+</div>
+
+<div class="stack">
+    <section class="card">
+        <p>@complaint.Description</p>
+        <p class="muted" style="margin:0">
+            Цель: @Model.TargetLabel · подана @complaint.SubmittedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+        </p>
+    </section>
+
+    @if (complaint.Evidence.Count > 0)
+    {
+        <section class="card">
+            <h2>Материалы</h2>
+            <ul>
+                @foreach (var evidence in complaint.Evidence)
+                {
+                    <li><a href="/complaints/@complaint.Id/evidence/@evidence.Id">@evidence.OriginalFileName</a></li>
+                }
+            </ul>
+        </section>
+    }
+
+    <section class="card">
+        <h2>Рассмотрение</h2>
+
+        @if (complaint.History.Count == 0)
+        {
+            <p class="empty">Пока без изменений.</p>
+        }
+        else
+        {
+            <ul class="history">
+                @foreach (var item in complaint.History)
+                {
+                    <li>
+                        @item.HandledAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                        @if (!string.IsNullOrWhiteSpace(item.RequestedDetails))
+                        {
+                            <div>Запрошены уточнения: @item.RequestedDetails</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.Decision))
+                        {
+                            <div><strong>Решение:</strong> @item.Decision</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.Rationale))
+                        {
+                            <div class="muted">Обоснование: @item.Rationale</div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

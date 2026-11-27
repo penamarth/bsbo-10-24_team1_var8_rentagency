@@ -1,0 +1,232 @@
+@model RentalWorkspaceViewModel
+@{
+    ViewData["Title"] = "Заявка";
+    var request = Model.Request;
+    var agreement = Model.Agreement;
+    var isOwner = Model.IsOwner;
+    var termsConfirmedByMe = agreement?.TermsConfirmedBy.Contains(Model.CurrentUserId) is true;
+    var completionConfirmedByMe = agreement?.CompletionConfirmedBy.Contains(Model.CurrentUserId) is true;
+    var bothTermsConfirmed = agreement is not null
+        && agreement.TermsConfirmedBy.Contains(request.OwnerId)
+        && agreement.TermsConfirmedBy.Contains(request.TenantId);
+}
+
+<a class="link-quiet" asp-controller="Rentals" asp-action="Index">← Заявки</a>
+
+<div class="section-head" style="margin-top:0.8rem">
+    <div>
+        <h1 style="margin-bottom:0.25rem">@Model.Address</h1>
+        <p class="muted" style="margin:0">
+            Арендодатель: @Model.OwnerName · Арендатор: @Model.TenantName
+        </p>
+    </div>
+    <span class="badge">@request.Status.ToRussian()</span>
+</div>
+
+@if (request.RejectionReason is not null)
+{
+    <div class="alert alert-error">Причина отклонения: @request.RejectionReason</div>
+}
+
+<div class="split">
+    <div class="stack">
+        <section class="card">
+            <h2>Переписка</h2>
+
+            @if (request.Messages.Count == 0)
+            {
+                <p class="empty">Сообщений пока нет.</p>
+            }
+            else
+            {
+                <div class="message-list">
+                    @foreach (var message in request.Messages)
+                    {
+                        var author = message.AuthorId == Model.CurrentUserId
+                            ? "Вы"
+                            : message.AuthorId == request.OwnerId ? Model.OwnerName : Model.TenantName;
+                        var mine = message.AuthorId == Model.CurrentUserId;
+
+                        <div class="message @(mine ? "message-mine" : "")">
+                            <div class="message-meta">@author · @message.SentAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                            <div>@message.Text</div>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (request.Status != RequestStatus.Rejected)
+            {
+                <form asp-controller="Rentals" asp-action="SendMessage" asp-route-id="@request.RequestId" method="post">
+                    <div class="field">
+                        <label for="text">Сообщение</label>
+                        <textarea id="text" name="text" required maxlength="4000"></textarea>
+                    </div>
+                    <button class="button" type="submit">Отправить</button>
+                </form>
+            }
+        </section>
+
+        @if (agreement is not null)
+        {
+            <section class="card">
+                <h2>Условия аренды</h2>
+                <p class="muted" style="margin-bottom:0.6rem">Версия условий: @agreement.TermsVersion</p>
+
+                <table>
+                    <tbody>
+                    <tr><th>Начало</th><td>@agreement.Terms.Start.ToString("dd.MM.yyyy")</td></tr>
+                    <tr><th>Окончание</th><td>@agreement.Terms.End.ToString("dd.MM.yyyy")</td></tr>
+                    <tr><th>Цена в месяц</th><td>@agreement.Terms.MonthlyPrice.ToString("N0") ₽</td></tr>
+                    <tr><th>Залог</th><td>@agreement.Terms.Deposit.ToString("N0") ₽</td></tr>
+                    </tbody>
+                </table>
+
+                <p style="margin-top:0.7rem">
+                    Подтвердили: @(agreement.TermsConfirmedBy.Count) из 2
+                </p>
+
+                @if (agreement.Status == AgreementStatus.Draft)
+                {
+                    @if (termsConfirmedByMe)
+                    {
+                        <p class="muted">Вы подтвердили эту версию. Ожидается вторая сторона.</p>
+                    }
+                    else
+                    {
+                        <form asp-controller="Rentals" asp-action="ConfirmTerms" asp-route-id="@request.RequestId" method="post">
+                            <input type="hidden" name="agreementId" value="@agreement.AgreementId" />
+                            <input type="hidden" name="termsVersion" value="@agreement.TermsVersion" />
+                            <button class="button" type="submit">Подтвердить условия</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <p class="badge badge-success">Условия согласованы</p>
+                }
+
+                @if (bothTermsConfirmed && agreement.Status != AgreementStatus.Draft)
+                {
+                    <h3 style="margin-top:1rem">Завершение аренды</h3>
+
+                    @if (agreement.Status == AgreementStatus.Completed)
+                    {
+                        <p class="badge badge-success">Аренда завершена</p>
+                    }
+                    else if (completionConfirmedByMe)
+                    {
+                        <p class="muted">Вы подтвердили завершение. Ожидается вторая сторона.</p>
+                    }
+                    else
+                    {
+                        <form asp-controller="Rentals" asp-action="ConfirmCompletion" asp-route-id="@request.RequestId" method="post">
+                            <input type="hidden" name="agreementId" value="@agreement.AgreementId" />
+                            <button class="button" type="submit">Подтвердить завершение</button>
+                        </form>
+                    }
+                }
+            </section>
+
+            @if (agreement.Status == AgreementStatus.Completed)
+            {
+                <section class="card">
+                    <h2>Отзывы</h2>
+
+                    @if (Model.Reviews.Count == 0)
+                    {
+                        <p class="empty">Отзывов пока нет.</p>
+                    }
+                    else
+                    {
+                        <div class="message-list">
+                            @foreach (var review in Model.Reviews)
+                            {
+                                var author = review.AuthorId == Model.CurrentUserId
+                                    ? "Вы"
+                                    : review.AuthorId == request.OwnerId ? Model.OwnerName : Model.TenantName;
+
+                                <div class="message">
+                                    <div class="message-meta">@author · @review.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</div>
+                                    <div>@review.Text</div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (!Model.HasReview)
+                    {
+                        <form asp-controller="Rentals" asp-action="Review" asp-route-id="@request.RequestId" method="post">
+                            <input type="hidden" name="agreementId" value="@agreement.AgreementId" />
+                            <div class="field">
+                                <label for="review-text">Отзыв о второй стороне</label>
+                                <textarea id="review-text" name="text" required maxlength="4000"></textarea>
+                            </div>
+                            <button class="button" type="submit">Оставить отзыв</button>
+                        </form>
+                    }
+                </section>
+            }
+        }
+    </div>
+
+    <aside class="stack">
+        @if (isOwner && request.Status == RequestStatus.New)
+        {
+            <div class="card">
+                <h2>Решение по заявке</h2>
+
+                <form asp-controller="Rentals" asp-action="StartDiscussion" asp-route-id="@request.RequestId" method="post" class="inline-form">
+                    <button class="button" type="submit">Начать обсуждение</button>
+                </form>
+
+                <form asp-controller="Rentals" asp-action="Reject" asp-route-id="@request.RequestId" method="post" style="margin-top:0.8rem">
+                    <div class="field">
+                        <label for="reason">Причина отклонения</label>
+                        <input id="reason" name="reason" required maxlength="2000" />
+                    </div>
+                    <button class="button button-danger" type="submit">Отклонить</button>
+                </form>
+            </div>
+        }
+
+        @if (request.Status != RequestStatus.Rejected && agreement?.Status != AgreementStatus.Confirmed && agreement?.Status != AgreementStatus.Completed)
+        {
+            <div class="card">
+                <h2>@(agreement is null ? "Предложить условия" : "Новая версия условий")</h2>
+
+                <form asp-controller="Rentals" asp-action="ProposeTerms" asp-route-id="@request.RequestId" method="post">
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label asp-for="Terms.Start"></label>
+                            <input asp-for="Terms.Start" type="date" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Terms.End"></label>
+                            <input asp-for="Terms.End" type="date" />
+                        </div>
+                    </div>
+                    <div class="inline-fields">
+                        <div class="field">
+                            <label asp-for="Terms.MonthlyPrice"></label>
+                            <input asp-for="Terms.MonthlyPrice" type="number" min="1" step="1000" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Terms.Deposit"></label>
+                            <input asp-for="Terms.Deposit" type="number" min="0" step="1000" />
+                        </div>
+                    </div>
+                    <button class="button" type="submit">Предложить</button>
+                </form>
+            </div>
+        }
+
+        <div class="card">
+            <h2>Первоначальная заявка</h2>
+            <p>@request.InitialMessage</p>
+            <p class="muted" style="margin:0">
+                Даты: @request.ProposedStart.ToString("dd.MM.yyyy") — @request.ProposedEnd.ToString("dd.MM.yyyy")
+            </p>
+        </div>
+    </aside>
+</div>

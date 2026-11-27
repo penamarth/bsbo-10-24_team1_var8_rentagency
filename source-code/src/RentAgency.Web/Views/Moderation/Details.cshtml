@@ -1,0 +1,92 @@
+@model ModerationDetailsPageViewModel
+@{
+    ViewData["Title"] = "Проверка объявления";
+    var details = Model.Moderation.Details;
+}
+
+<a class="link-quiet" asp-controller="Moderation" asp-action="Index">← Очередь</a>
+
+<div class="section-head" style="margin-top:0.8rem">
+    <h1 style="margin:0">@details.Address</h1>
+    <span class="badge">@details.Status.ToRussian()</span>
+</div>
+
+<div class="split">
+    <div class="stack">
+        @if (details.PhotoKeys.Count > 0)
+        {
+            <div class="photo-main">
+                <img src="@PhotoUrls.Listing(details.PhotoKeys[0])" alt="Фотография жилья" />
+            </div>
+            <div class="photo-grid">
+                @foreach (var photo in details.PhotoKeys.Skip(1))
+                {
+                    <a href="@PhotoUrls.Listing(photo)" target="_blank" rel="noreferrer">
+                        <img src="@PhotoUrls.Listing(photo)" alt="" loading="lazy" />
+                    </a>
+                }
+            </div>
+        }
+
+        <section class="card">
+            <h2>Описание</h2>
+            <p>@details.Description</p>
+
+            <h3>Условия сдачи</h3>
+            <p>@details.RentalTerms</p>
+
+            <p class="muted">
+                @details.Rooms комн. · @details.Area.ToString("0.#") м² · @details.Price.ToString("N0") ₽ в месяц ·
+                доступно с @details.AvailableFrom.ToString("dd.MM.yyyy")
+            </p>
+        </section>
+
+        <section class="card">
+            <h2>История модерации</h2>
+
+            @if (details.History.Count == 0)
+            {
+                <p class="empty">Решений пока нет.</p>
+            }
+            else
+            {
+                <ul class="history">
+                    @foreach (var item in details.History)
+                    {
+                        <li>
+                            <strong>@item.Result.ToRussian()</strong> · @item.DecidedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            @if (!string.IsNullOrWhiteSpace(item.Remarks))
+                            {
+                                <div class="muted">@item.Remarks</div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+
+    <aside class="card">
+        <h2>Решение</h2>
+
+        <form asp-controller="Moderation" asp-action="Decide" asp-route-id="@details.ListingId" method="post">
+            <input type="hidden" name="ExpectedVersion" value="@details.Version" />
+
+            <div class="field">
+                <label for="result">Результат</label>
+                <select id="result" name="Result">
+                    <option value="Approved">Одобрить</option>
+                    <option value="ReturnedForRevision">Вернуть на доработку</option>
+                    <option value="Rejected">Отклонить</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="remarks">Замечания или причина</label>
+                <textarea id="remarks" name="Remarks" maxlength="2000"></textarea>
+            </div>
+
+            <button class="button" type="submit">Сохранить решение</button>
+        </form>
+    </aside>
+</div>

@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — нахлебная крыша</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<header class="site-header">
+    <div class="shell header-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index">
+            <span class="roof" aria-hidden="true"></span>
+            <span class="brand-name">нахлебная крыша</span>
+        </a>
+
+        <nav class="site-nav" aria-label="Основная навигация">
+            <a asp-controller="Home" asp-action="Index">Поиск</a>
+            @if (User.Identity?.IsAuthenticated is true)
+            {
+                <a asp-controller="Rentals" asp-action="Index">Заявки</a>
+                @if (User.IsInRole(RentAgency.Web.Features.Accounts.UserRoles.Owner))
+                {
+                    <a asp-controller="Owner" asp-action="Index">Мои объявления</a>
+                }
+                @if (User.IsInRole(RentAgency.Web.Features.Accounts.UserRoles.Moderator))
+                {
+                    <a asp-controller="Moderation" asp-action="Index">Модерация</a>
+                    <a asp-controller="Moderation" asp-action="Complaints">Жалобы</a>
+                }
+                else
+                {
+                    <a asp-controller="Complaints" asp-action="Index">Жалобы</a>
+                }
+                <a asp-controller="Account" asp-action="Notifications">Уведомления</a>
+            }
+        </nav>
+
+        <partial name="_LoginPartial" />
+    </div>
+</header>
+
+<main class="shell main">
+    <partial name="_Alerts" />
+    @RenderBody()
+</main>
+
+<footer class="site-footer">
+    <div class="shell">нахлебная крыша · аренда жилья</div>
+</footer>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,57 @@
+@model RequestListViewModel
+@{
+    ViewData["Title"] = "Заявки";
+}
+
+<h1>Заявки</h1>
+
+<section class="section">
+    <h2>Мои отклики</h2>
+
+    @if (Model.AsTenant.Count == 0)
+    {
+        <p class="empty">Вы ещё не откликались на объявления. <a asp-controller="Home" asp-action="Index">Найти жильё</a></p>
+    }
+    else
+    {
+        <table>
+            <thead>
+            <tr><th>Жильё</th><th>Статус</th><th>Создана</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var request in Model.AsTenant)
+            {
+                <tr>
+                    <td>@request.Address</td>
+                    <td><span class="badge badge-muted">@request.Status.ToRussian()</span></td>
+                    <td>@request.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td><a asp-controller="Rentals" asp-action="Details" asp-route-id="@request.RequestId">Открыть</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
+
+@if (Model.AsOwner.Count > 0)
+{
+    <section class="section">
+        <h2>Заявки на мои объявления</h2>
+        <table>
+            <thead>
+            <tr><th>Жильё</th><th>Статус</th><th>Создана</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var request in Model.AsOwner)
+            {
+                <tr>
+                    <td>@request.Address</td>
+                    <td><span class="badge badge-muted">@request.Status.ToRussian()</span></td>
+                    <td>@request.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td><a asp-controller="Rentals" asp-action="Details" asp-route-id="@request.RequestId">Открыть</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </section>
+}

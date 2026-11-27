@@ -1,0 +1,31 @@
+@model IReadOnlyList<ModerationQueueItem>
+@{
+    ViewData["Title"] = "Модерация";
+}
+
+<h1>Очередь модерации</h1>
+
+@if (Model.Count == 0)
+{
+    <p class="empty">Объявлений на проверке нет.</p>
+}
+else
+{
+    <table>
+        <thead>
+        <tr><th>Адрес</th><th>Цена</th><th>Отправлено</th><th>Версия</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Address</td>
+                <td>@item.Price.ToString("N0") ₽</td>
+                <td>@item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                <td class="muted">@item.Version</td>
+                <td><a asp-controller="Moderation" asp-action="Details" asp-route-id="@item.ListingId">Проверить</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

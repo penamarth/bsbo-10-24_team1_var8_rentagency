@@ -1,0 +1,50 @@
+﻿@model SearchPageViewModel
+@{
+    ViewData["Title"] = "Аренда жилья";
+}
+
+<section class="section">
+    <h1>Аренда жилья</h1>
+
+    <form method="get" asp-controller="Home" asp-action="Index" class="search-bar">
+        <div class="field" style="margin-bottom:0">
+            <label for="location">Где</label>
+            <input id="location" name="location" value="@Model.Location" placeholder="Район или адрес" />
+        </div>
+        <div class="field" style="margin-bottom:0">
+            <label for="maxPrice">До, ₽ в месяц</label>
+            <input id="maxPrice" name="maxPrice" type="number" min="0" step="1000" value="@Model.MaxPrice" />
+        </div>
+        <div class="field" style="margin-bottom:0">
+            <label for="rooms">Комнат</label>
+            <input id="rooms" name="rooms" type="number" min="1" max="20" value="@Model.Rooms" />
+        </div>
+        <button class="button" type="submit">Найти</button>
+    </form>
+</section>
+
+@if (Model.Results.Count == 0)
+{
+    <p class="empty">Подходящих объявлений пока нет.</p>
+}
+else
+{
+    <div class="grid-cards">
+        @foreach (var listing in Model.Results)
+        {
+            <a class="listing-card" asp-controller="Listing" asp-action="Details" asp-route-id="@listing.ListingId">
+                <span class="listing-card-media">
+                    @if (listing.CoverPhotoKey is not null)
+                    {
+                        <img src="@PhotoUrls.Listing(listing.CoverPhotoKey)" alt="" loading="lazy" />
+                    }
+                </span>
+                <span class="listing-card-body">
+                    <span class="listing-price">@listing.Price.ToString("N0") ₽ <small class="listing-meta">в месяц</small></span>
+                    <span class="listing-address">@listing.Address</span>
+                    <span class="listing-meta">@listing.Rooms комн. · @listing.Area.ToString("0.#") м² · с @listing.AvailableFrom.ToString("dd.MM.yyyy")</span>
+                </span>
+            </a>
+        }
+    </div>
+}
