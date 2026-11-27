@@ -3,50 +3,51 @@
     ViewData["Title"] = "Регистрация";
 }
 
-<h1>Регистрация</h1>
+<div class="narrow">
+    <div class="card">
+        <h1>Регистрация</h1>
+        <p class="muted">Аккаунт арендатора. Арендодателем можно стать позже в один клик.</p>
 
-<div class="row">
-    <div class="col-md-6">
         <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="validation"></div>
 
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" autocomplete="name" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" autocomplete="name" />
+                <span asp-validation-for="Name" class="validation"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="ContactDetails" class="form-label"></label>
-                <input asp-for="ContactDetails" class="form-control" autocomplete="tel" />
-                <span asp-validation-for="ContactDetails" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="ContactDetails"></label>
+                <input asp-for="ContactDetails" autocomplete="tel" placeholder="Телефон или другой контакт" />
+                <span asp-validation-for="ContactDetails" class="validation"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" autocomplete="email" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" autocomplete="email" />
+                <span asp-validation-for="Email" class="validation"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="validation"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            <div class="field">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmPassword" class="validation"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            <button type="submit" class="button" style="width:100%">Зарегистрироваться</button>
         </form>
-
-        <p class="mt-3">
-            Уже есть аккаунт? <a asp-action="Login">Войти</a>
-        </p>
     </div>
+
+    <p class="muted" style="text-align:center; margin-top:0.9rem">
+        Уже есть аккаунт? <a asp-action="Login">Войти</a>
+    </p>
 </div>
 
 @section Scripts {

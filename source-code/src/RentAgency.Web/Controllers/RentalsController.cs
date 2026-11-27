@@ -19,7 +19,7 @@ public class RentalsController(
     UserManager<ApplicationUser> users) : Controller
 {
     [HttpGet("/rentals")]
-    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(string? tab, CancellationToken cancellationToken)
     {
         var userId = CurrentUserId();
 
@@ -27,6 +27,8 @@ public class RentalsController(
         {
             return Challenge();
         }
+
+        ViewData["Tab"] = tab == "owner" ? "owner" : "tenant";
 
         return View(new RequestListViewModel
         {

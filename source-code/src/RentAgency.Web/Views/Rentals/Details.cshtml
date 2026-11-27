@@ -9,23 +9,43 @@
     var bothTermsConfirmed = agreement is not null
         && agreement.TermsConfirmedBy.Contains(request.OwnerId)
         && agreement.TermsConfirmedBy.Contains(request.TenantId);
+
+    string StepClass(int step)
+    {
+        var current = 1;
+        if (agreement is null) { current = 2; }
+        else if (agreement.Status == AgreementStatus.Draft) { current = 2; }
+        else if (agreement.Status == AgreementStatus.Confirmed) { current = 3; }
+        else if (agreement.Status == AgreementStatus.Completed) { current = 4; }
+
+        if (request.Status == RequestStatus.Rejected) { return ""; }
+        return step < current ? "done" : step == current ? "current" : "";
+    }
 }
 
 <a class="link-quiet" asp-controller="Rentals" asp-action="Index">← Заявки</a>
 
-<div class="section-head" style="margin-top:0.8rem">
+<div class="page-head" style="margin-top:0.8rem">
     <div>
         <h1 style="margin-bottom:0.25rem">@Model.Address</h1>
-        <p class="muted" style="margin:0">
-            Арендодатель: @Model.OwnerName · Арендатор: @Model.TenantName
-        </p>
+        <p class="page-sub">Арендодатель: @Model.OwnerName · Арендатор: @Model.TenantName</p>
     </div>
-    <span class="@StatusBadge.For(request.Status)">@request.Status.ToRussian()</span>
+    <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(request.Status)">@request.Status.ToRussian()</span>
 </div>
 
 @if (request.RejectionReason is not null)
 {
     <div class="alert alert-error">Причина отклонения: @request.RejectionReason</div>
+}
+
+@if (request.Status != RequestStatus.Rejected)
+{
+    <ol class="steps">
+        <li class="@StepClass(1)">Заявка</li>
+        <li class="@StepClass(2)">Условия</li>
+        <li class="@StepClass(3)">Аренда</li>
+        <li class="@StepClass(4)">Завершение</li>
+    </ol>
 }
 
 <div class="split">
@@ -48,7 +68,7 @@
                         var mine = message.AuthorId == Model.CurrentUserId;
 
                         <div class="message @(mine ? "message-mine" : "")">
-                            <div class="message-meta">@author · @message.SentAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                            <div class="message-meta">@author · @message.SentAt.ToLocalTime().ToString("dd.MM HH:mm")</div>
                             <div>@message.Text</div>
                         </div>
                     }
@@ -70,53 +90,53 @@
         @if (agreement is not null)
         {
             <section class="card">
-                <h2>Условия аренды</h2>
-                <p class="muted" style="margin-bottom:0.6rem">Версия условий: @agreement.TermsVersion</p>
+                <div class="section-head" style="margin-bottom:0.6rem">
+                    <h2 style="margin:0">Условия аренды</h2>
+                    <span class="chip">версия @agreement.TermsVersion</span>
+                </div>
 
-                <table>
-                    <tbody>
-                    <tr><th>Начало</th><td>@agreement.Terms.Start.ToString("dd.MM.yyyy")</td></tr>
-                    <tr><th>Окончание</th><td>@agreement.Terms.End.ToString("dd.MM.yyyy")</td></tr>
-                    <tr><th>Цена в месяц</th><td>@agreement.Terms.MonthlyPrice.ToString("N0") ₽</td></tr>
-                    <tr><th>Залог</th><td>@agreement.Terms.Deposit.ToString("N0") ₽</td></tr>
-                    </tbody>
-                </table>
+                <dl class="dl">
+                    <dt>Начало</dt><dd>@agreement.Terms.Start.ToString("dd.MM.yyyy")</dd>
+                    <dt>Окончание</dt><dd>@agreement.Terms.End.ToString("dd.MM.yyyy")</dd>
+                    <dt>Цена в месяц</dt><dd>@agreement.Terms.MonthlyPrice.ToString("N0") ₽</dd>
+                    <dt>Залог</dt><dd>@agreement.Terms.Deposit.ToString("N0") ₽</dd>
+                </dl>
 
-                <p style="margin-top:0.7rem">
-                    Подтвердили: @(agreement.TermsConfirmedBy.Count) из 2
+                <p style="margin:0.8rem 0 0">
+                    Подтвердили: @agreement.TermsConfirmedBy.Count из 2
                 </p>
 
                 @if (agreement.Status == AgreementStatus.Draft)
                 {
                     @if (termsConfirmedByMe)
                     {
-                        <p class="muted">Вы подтвердили эту версию. Ожидается вторая сторона.</p>
+                        <p class="muted" style="margin-top:0.6rem">Вы подтвердили эту версию. Ожидается вторая сторона.</p>
                     }
                     else
                     {
-                        <form asp-controller="Rentals" asp-action="ConfirmTerms" asp-route-id="@request.RequestId" method="post">
+                        <form asp-controller="Rentals" asp-action="ConfirmTerms" asp-route-id="@request.RequestId" method="post" style="margin-top:0.6rem">
                             <input type="hidden" name="agreementId" value="@agreement.AgreementId" />
                             <input type="hidden" name="termsVersion" value="@agreement.TermsVersion" />
                             <button class="button" type="submit">Подтвердить условия</button>
                         </form>
                     }
                 }
-                else
+                else if (agreement.Status == AgreementStatus.Confirmed)
                 {
-                    <p class="badge badge--success">Условия согласованы</p>
+                    <p style="margin-top:0.6rem"><span class="badge badge--success">Условия согласованы</span></p>
                 }
 
                 @if (bothTermsConfirmed && agreement.Status != AgreementStatus.Draft)
                 {
-                    <h3 style="margin-top:1rem">Завершение аренды</h3>
+                    <h3 style="margin-top:1.2rem">Завершение аренды</h3>
 
                     @if (agreement.Status == AgreementStatus.Completed)
                     {
-                        <p class="badge badge--success">Аренда завершена</p>
+                        <p style="margin:0"><span class="badge badge--done">Аренда завершена</span></p>
                     }
                     else if (completionConfirmedByMe)
                     {
-                        <p class="muted">Вы подтвердили завершение. Ожидается вторая сторона.</p>
+                        <p class="muted" style="margin:0">Вы подтвердили завершение. Ожидается вторая сторона.</p>
                     }
                     else
                     {
@@ -173,14 +193,14 @@
     <aside class="stack">
         @if (isOwner && request.Status == RequestStatus.New)
         {
-            <div class="card">
+            <div class="card aside-sticky">
                 <h2>Решение по заявке</h2>
-
-                <form asp-controller="Rentals" asp-action="StartDiscussion" asp-route-id="@request.RequestId" method="post" class="inline-form">
-                    <button class="button" type="submit">Начать обсуждение</button>
-                </form>
-
-                <form asp-controller="Rentals" asp-action="Reject" asp-route-id="@request.RequestId" method="post" style="margin-top:0.8rem">
+                <div class="form-actions">
+                    <form asp-controller="Rentals" asp-action="StartDiscussion" asp-route-id="@request.RequestId" method="post" class="inline-form">
+                        <button class="button" type="submit">Начать обсуждение</button>
+                    </form>
+                </div>
+                <form asp-controller="Rentals" asp-action="Reject" asp-route-id="@request.RequestId" method="post" style="margin-top:0.9rem">
                     <div class="field">
                         <label for="reason">Причина отклонения</label>
                         <input id="reason" name="reason" required maxlength="2000" />
@@ -194,7 +214,6 @@
         {
             <div class="card">
                 <h2>@(agreement is null ? "Предложить условия" : "Новая версия условий")</h2>
-
                 <form asp-controller="Rentals" asp-action="ProposeTerms" asp-route-id="@request.RequestId" method="post">
                     <div class="inline-fields">
                         <div class="field">
@@ -209,11 +228,11 @@
                     <div class="inline-fields">
                         <div class="field">
                             <label asp-for="Terms.MonthlyPrice"></label>
-                            <input asp-for="Terms.MonthlyPrice" type="number" min="1" step="1000" />
+                            <input asp-for="Terms.MonthlyPrice" type="number" min="1" />
                         </div>
                         <div class="field">
                             <label asp-for="Terms.Deposit"></label>
-                            <input asp-for="Terms.Deposit" type="number" min="0" step="1000" />
+                            <input asp-for="Terms.Deposit" type="number" min="0" />
                         </div>
                     </div>
                     <button class="button" type="submit">Предложить</button>
@@ -225,7 +244,7 @@
             <h2>Первоначальная заявка</h2>
             <p>@request.InitialMessage</p>
             <p class="muted" style="margin:0">
-                Даты: @request.ProposedStart.ToString("dd.MM.yyyy") — @request.ProposedEnd.ToString("dd.MM.yyyy")
+                @request.ProposedStart.ToString("dd.MM.yyyy") — @request.ProposedEnd.ToString("dd.MM.yyyy")
             </p>
         </div>
     </aside>

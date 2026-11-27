@@ -11,43 +11,43 @@
     <div class="stack">
         @if (photos.Count > 0)
         {
-            <div class="photo-main">
-                <img src="@PhotoUrls.Listing(photos[0])" alt="Фотография жилья" />
-            </div>
-
-            @if (photos.Count > 1)
-            {
-                <div class="photo-grid">
-                    @foreach (var photo in photos.Skip(1))
-                    {
-                        <a href="@PhotoUrls.Listing(photo)" target="_blank" rel="noreferrer">
-                            <img src="@PhotoUrls.Listing(photo)" alt="" loading="lazy" />
-                        </a>
-                    }
+            <div class="gallery">
+                <div class="photo-main">
+                    <img src="@PhotoUrls.Listing(photos[0])" alt="Фотография жилья" />
                 </div>
-            }
+                @if (photos.Count > 1)
+                {
+                    <div class="gallery-thumbs">
+                        @foreach (var photo in photos.Skip(1))
+                        {
+                            <a href="@PhotoUrls.Listing(photo)" target="_blank" rel="noreferrer">
+                                <img src="@PhotoUrls.Listing(photo)" alt="" loading="lazy" />
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
         }
 
         <section class="card">
             <h2>Описание</h2>
-            <p>@listing.Description</p>
-
+            <p style="margin-bottom:1rem">@listing.Description</p>
             <h3>Условия сдачи</h3>
-            <p>@listing.RentalTerms</p>
+            <p style="margin:0">@listing.RentalTerms</p>
         </section>
     </div>
 
-    <aside class="stack aside-sticky">
-        <div class="card">
-            <h1 style="margin-bottom:0.4rem">@listing.Address</h1>
-            <div class="price-line">@listing.Price.ToString("N0") ₽ <small>в месяц</small></div>
+    <aside class="stack">
+        <div class="card aside-sticky">
+            <h1 style="margin-bottom:0.35rem; font-size:1.4rem">@listing.Address</h1>
+            <span class="badge badge--success">@listing.Status.ToRussian()</span>
+            <div class="price-line" style="margin-top:0.6rem">@listing.Price.ToString("N0") ₽ <small>в месяц</small></div>
             <p class="muted" style="margin-top:0.4rem">
                 @listing.Rooms комн. · @listing.Area.ToString("0.#") м² · доступно с @listing.AvailableFrom.ToString("dd.MM.yyyy")
             </p>
 
             @if (Model.IsOwner)
             {
-                <p class="muted">Это ваше объявление.</p>
                 <a class="button button-secondary" asp-controller="Owner" asp-action="Index">Мои объявления</a>
             }
             else if (!Model.IsAuthenticated)
@@ -57,8 +57,7 @@
             }
             else
             {
-                <h3 style="margin-top:1rem">Откликнуться</h3>
-
+                <h3 style="margin-top:1.2rem">Откликнуться</h3>
                 <form asp-controller="Rentals" asp-action="Apply" asp-route-listingId="@listing.ListingId" method="post">
                     <div asp-validation-summary="ModelOnly" class="validation"></div>
 
@@ -83,12 +82,15 @@
 
                     <button class="button" type="submit">Отправить заявку</button>
                 </form>
-
-                <p style="margin-top:0.8rem">
-                    <a class="link-quiet" asp-controller="Complaints" asp-action="Create" asp-route-listingId="@listing.ListingId">Пожаловаться на объявление</a>
-                </p>
             }
         </div>
+
+        @if (Model.IsAuthenticated && !Model.IsOwner)
+        {
+            <p style="margin:0">
+                <a class="link-quiet" asp-controller="Complaints" asp-action="Create" asp-route-listingId="@listing.ListingId">Пожаловаться на объявление</a>
+            </p>
+        }
     </aside>
 </div>
 

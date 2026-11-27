@@ -5,33 +5,34 @@
 
 <a class="link-quiet" asp-controller="Complaints" asp-action="Index">← Мои жалобы</a>
 
-<h1 style="margin-top:0.8rem">Жалоба</h1>
+<div class="narrow" style="margin-top:0.8rem">
+    <div class="card">
+        <h1>Жалоба</h1>
+        <p class="muted">Цель: @Model.TargetLabel</p>
 
-<div class="card" style="max-width:640px">
-    <p class="muted">Цель: @Model.TargetLabel</p>
+        <form asp-controller="Complaints" asp-action="Create" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="ListingId" />
+            <input type="hidden" asp-for="TargetUserId" />
+            <input type="hidden" asp-for="TargetLabel" />
 
-    <form asp-controller="Complaints" asp-action="Create" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="ListingId" />
-        <input type="hidden" asp-for="TargetUserId" />
-        <input type="hidden" asp-for="TargetLabel" />
+            <div asp-validation-summary="ModelOnly" class="validation"></div>
 
-        <div asp-validation-summary="ModelOnly" class="validation"></div>
+            <div class="field">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" maxlength="4000" placeholder="Что произошло"></textarea>
+                <span asp-validation-for="Description" class="validation"></span>
+            </div>
 
-        <div class="field">
-            <label asp-for="Description"></label>
-            <textarea asp-for="Description" maxlength="4000"></textarea>
-            <span asp-validation-for="Description" class="validation"></span>
-        </div>
+            <div class="field">
+                <label asp-for="Evidence"></label>
+                <input asp-for="Evidence" type="file" name="Evidence" multiple accept="image/jpeg,image/png,application/pdf" />
+                <span asp-validation-for="Evidence" class="validation"></span>
+                <p class="muted" style="font-size:0.85rem">Необязательно. До 3 файлов, до 10 МБ каждый.</p>
+            </div>
 
-        <div class="field">
-            <label asp-for="Evidence"></label>
-            <input asp-for="Evidence" type="file" name="Evidence" multiple accept="image/jpeg,image/png,application/pdf" />
-            <span asp-validation-for="Evidence" class="validation"></span>
-            <p class="muted" style="font-size:0.85rem">Необязательно. До 3 файлов, до 10 МБ каждый.</p>
-        </div>
-
-        <button class="button" type="submit">Отправить жалобу</button>
-    </form>
+            <button class="button" type="submit" style="width:100%">Отправить жалобу</button>
+        </form>
+    </div>
 </div>
 
 @section Scripts {

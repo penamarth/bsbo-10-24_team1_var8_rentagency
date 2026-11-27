@@ -2,6 +2,10 @@
     ViewData["Title"] = "Доступ запрещён";
 }
 
-<h1>Доступ запрещён</h1>
-
-<p>У вашего аккаунта нет прав для этого действия.</p>
+<div class="narrow" style="margin-top:2rem">
+    <div class="card">
+        <h1>Доступ запрещён</h1>
+        <p class="muted">У вашего аккаунта нет прав для этого действия.</p>
+        <a class="button button-secondary" asp-controller="Home" asp-action="Index">На главную</a>
+    </div>
+</div>

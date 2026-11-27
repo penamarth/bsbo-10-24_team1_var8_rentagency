@@ -3,30 +3,32 @@
     ViewData["Title"] = "Мои жалобы";
 }
 
-<h1>Мои жалобы</h1>
+<div class="page-head">
+    <h1 style="margin:0">Мои жалобы</h1>
+</div>
 
 @if (Model.Count == 0)
 {
-    <partial name="_EmptyState" model='("Жалоб пока нет. Пожаловаться можно со страницы объявления.", "К поиску", "Home", "Index")' />
+    <partial name="_EmptyState" model='("Жалоб пока нет. Пожаловаться можно со страницы объявления.", "Найти жильё", "Home", "Index")' />
 }
 else
 {
-    <div class="table-wrap" role="region" aria-label="Таблица данных" tabindex="0">
-<table>
-        <thead>
-        <tr><th>Цель</th><th>Статус</th><th>Подана</th><th></th></tr>
-        </thead>
-        <tbody>
-        @foreach (var complaint in Model)
-        {
-            <tr>
-                <td>@(complaint.TargetListingId is not null ? "Объявление" : "Пользователь")</td>
-                <td><span class="@StatusBadge.For(complaint.Status)">@complaint.Status.ToRussian()</span></td>
-                <td>@complaint.SubmittedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                <td><a asp-controller="Complaints" asp-action="Details" asp-route-id="@complaint.Id">Открыть</a></td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
+    <div class="table-wrap" role="region" aria-label="Мои жалобы" tabindex="0">
+        <table>
+            <thead>
+            <tr><th>Цель</th><th>Статус</th><th>Подана</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var complaint in Model)
+            {
+                <tr>
+                    <td>@(complaint.TargetListingId is not null ? "Объявление" : "Пользователь")</td>
+                    <td><span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(complaint.Status)">@complaint.Status.ToRussian()</span></td>
+                    <td>@complaint.SubmittedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                    <td><a asp-controller="Complaints" asp-action="Details" asp-route-id="@complaint.Id">Открыть</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 }

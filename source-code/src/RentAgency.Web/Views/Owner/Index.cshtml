@@ -3,74 +3,74 @@
     ViewData["Title"] = "Мои объявления";
 }
 
-<div class="section-head">
-    <h1 style="margin:0">Мои объявления</h1>
-    <a class="button" asp-controller="Owner" asp-action="Create">Разместить объявление</a>
+<div class="page-head">
+    <div>
+        <h1 style="margin:0">Мои объявления</h1>
+        <p class="page-sub">@Model.Listings.Count шт. · @Model.Requests.Count заявок</p>
+    </div>
+    <div class="page-actions">
+        <a class="button" asp-controller="Owner" asp-action="Create">Разместить объявление</a>
+    </div>
 </div>
 
 @if (Model.Listings.Count == 0)
 {
-    <partial name="_EmptyState" model='("Объявлений пока нет.", "Разместить объявление", "Owner", "Create")' />
+    <partial name="_EmptyState" model='("Объявлений пока нет. Разместите первое — после модерации оно появится в поиске.", "Разместить объявление", "Owner", "Create")' />
 }
 else
 {
-    <div class="table-wrap" role="region" aria-label="Таблица данных" tabindex="0">
-<table class="section">
-        <thead>
-        <tr><th>Адрес</th><th>Цена</th><th>Статус</th><th>Версия</th><th></th></tr>
-        </thead>
-        <tbody>
+    <div class="grid-cards">
         @foreach (var listing in Model.Listings)
         {
-            <tr>
-                <td>@listing.Address</td>
-                <td>@listing.Price.ToString("N0") ₽</td>
-                <td><span class="@StatusBadge.For(listing.Status)">@listing.Status.ToRussian()</span></td>
-                <td class="muted">@listing.Version</td>
-                <td>
+            <div class="owner-card">
+                <span class="listing-card-media @(listing.PhotoKeys.Count == 0 ? "is-empty" : "")">
+                    @if (listing.PhotoKeys.Count > 0)
+                    {
+                        <img src="@PhotoUrls.Listing(listing.PhotoKeys[0])" alt="" loading="lazy" />
+                    }
+                </span>
+                <div class="owner-card-body">
+                    <span class="listing-address">@listing.Address</span>
+                    <span class="listing-price">@listing.Price.ToString("N0") ₽ <small class="listing-meta">в месяц</small></span>
+                    <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(listing.Status)">@listing.Status.ToRussian()</span>
+                    @if (listing.Status == ListingStatus.NeedsRevision && listing.History.Count > 0 && !string.IsNullOrWhiteSpace(listing.History[0].Remarks))
+                    {
+                        <span class="listing-meta">@listing.History[0].Remarks</span>
+                    }
+                </div>
+                <div class="owner-card-foot">
+                    <span class="listing-meta">версия @listing.Version</span>
                     @if (listing.Status == ListingStatus.NeedsRevision)
                     {
                         <a asp-controller="Owner" asp-action="Edit" asp-route-id="@listing.ListingId">Исправить</a>
                     }
-                    else if (listing.History.Count > 0)
-                    {
-                        <span class="muted">@listing.History[0].Remarks</span>
-                    }
-                </td>
-            </tr>
+                </div>
+            </div>
         }
-        </tbody>
-    </table>
-</div>
+    </div>
 }
 
-<section class="section">
-    <h2>Заявки на мои объявления</h2>
-
-    @if (Model.Requests.Count == 0)
-    {
-        <p class="empty">Заявок пока нет — они появятся, когда арендаторы откликнутся.</p>
-    }
-    else
-    {
-        <div class="table-wrap" role="region" aria-label="Таблица данных" tabindex="0">
-<table>
-            <thead>
-            <tr><th>Жильё</th><th>Арендатор</th><th>Статус</th><th>Создана</th><th></th></tr>
-            </thead>
-            <tbody>
-            @foreach (var request in Model.Requests)
-            {
-                <tr>
-                    <td>@request.Address</td>
-                    <td class="muted">@request.TenantId.ToString()[..8]</td>
-                    <td><span class="@StatusBadge.For(request.Status)">@request.Status.ToRussian()</span></td>
-                    <td>@request.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
-                    <td><a asp-controller="Rentals" asp-action="Details" asp-route-id="@request.RequestId">Открыть</a></td>
-                </tr>
-            }
-            </tbody>
-        </table>
-</div>
-    }
-</section>
+@if (Model.Requests.Count > 0)
+{
+    <section class="section" style="margin-top:1.8rem">
+        <h2>Заявки на мои объявления</h2>
+        <div class="table-wrap" role="region" aria-label="Заявки на мои объявления" tabindex="0">
+            <table>
+                <thead>
+                <tr><th>Жильё</th><th>Статус</th><th>Создана</th><th></th></tr>
+                </thead>
+                <tbody>
+                @foreach (var request in Model.Requests)
+                {
+                    <tr>
+                        <td>@request.Address</td>
+                        <td><span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(request.Status)">@request.Status.ToRussian()</span></td>
+                        <td>@request.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td><a asp-controller="Rentals" asp-action="Details" asp-route-id="@request.RequestId">Открыть</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+}

@@ -6,39 +6,42 @@
 
 <a class="link-quiet" asp-controller="Moderation" asp-action="Index">← Очередь</a>
 
-<div class="section-head" style="margin-top:0.8rem">
-    <h1 style="margin:0">@details.Address</h1>
-    <span class="@StatusBadge.For(details.Status)">@details.Status.ToRussian()</span>
+<div class="page-head" style="margin-top:0.8rem">
+    <div>
+        <h1 style="margin:0">@details.Address</h1>
+        <p class="page-sub">версия @details.Version · @details.Rooms комн. · @details.Area.ToString("0.#") м² · @details.Price.ToString("N0") ₽ в месяц</p>
+    </div>
+    <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(details.Status)">@details.Status.ToRussian()</span>
 </div>
 
 <div class="split">
     <div class="stack">
         @if (details.PhotoKeys.Count > 0)
         {
-            <div class="photo-main">
-                <img src="@PhotoUrls.Listing(details.PhotoKeys[0])" alt="Фотография жилья" />
-            </div>
-            <div class="photo-grid">
-                @foreach (var photo in details.PhotoKeys.Skip(1))
+            <div class="gallery">
+                <div class="photo-main">
+                    <img src="@PhotoUrls.Listing(details.PhotoKeys[0])" alt="Фотография жилья" />
+                </div>
+                @if (details.PhotoKeys.Count > 1)
                 {
-                    <a href="@PhotoUrls.Listing(photo)" target="_blank" rel="noreferrer">
-                        <img src="@PhotoUrls.Listing(photo)" alt="" loading="lazy" />
-                    </a>
+                    <div class="gallery-thumbs">
+                        @foreach (var photo in details.PhotoKeys.Skip(1))
+                        {
+                            <a href="@PhotoUrls.Listing(photo)" target="_blank" rel="noreferrer">
+                                <img src="@PhotoUrls.Listing(photo)" alt="" loading="lazy" />
+                            </a>
+                        }
+                    </div>
                 }
             </div>
         }
 
         <section class="card">
             <h2>Описание</h2>
-            <p>@details.Description</p>
-
+            <p style="margin-bottom:1rem">@details.Description</p>
             <h3>Условия сдачи</h3>
-            <p>@details.RentalTerms</p>
-
-            <p class="muted">
-                @details.Rooms комн. · @details.Area.ToString("0.#") м² · @details.Price.ToString("N0") ₽ в месяц ·
-                доступно с @details.AvailableFrom.ToString("dd.MM.yyyy")
-            </p>
+            <p style="margin:0">@details.RentalTerms</p>
+            <p class="muted" style="margin-top:1rem">Доступно с @details.AvailableFrom.ToString("dd.MM.yyyy")</p>
         </section>
 
         <section class="card">
@@ -83,7 +86,7 @@
 
             <div class="field">
                 <label for="remarks">Замечания или причина</label>
-                <textarea id="remarks" name="Remarks" maxlength="2000"></textarea>
+                <textarea id="remarks" name="Remarks" maxlength="2000" placeholder="Обязательно для возврата и отклонения"></textarea>
             </div>
 
             <button class="button" type="submit">Сохранить решение</button>

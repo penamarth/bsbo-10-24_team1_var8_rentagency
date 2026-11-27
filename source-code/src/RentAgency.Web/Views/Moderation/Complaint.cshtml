@@ -6,15 +6,14 @@
 
 <a class="link-quiet" asp-controller="Moderation" asp-action="Complaints">← Жалобы</a>
 
-<div class="section-head" style="margin-top:0.8rem">
+<div class="page-head" style="margin-top:0.8rem">
     <h1 style="margin:0">Жалоба</h1>
-    <span class="@StatusBadge.For(complaint.Status)">@complaint.Status.ToRussian()</span>
+    <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(complaint.Status)">@complaint.Status.ToRussian()</span>
 </div>
 
 <div class="split">
     <div class="stack">
         <section class="card">
-            <h2>Суть</h2>
             <p>@complaint.Description</p>
             <p class="muted" style="margin:0">Цель: @Model.TargetLabel · подана @complaint.SubmittedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
         </section>
@@ -23,14 +22,12 @@
         {
             <section class="card">
                 <h2>Материалы</h2>
-                <ul>
+                <div class="chips">
                     @foreach (var evidence in complaint.Evidence)
                     {
-                        <li>
-                            <a href="/complaints/@complaint.Id/evidence/@evidence.Id">@evidence.OriginalFileName</a>
-                        </li>
+                        <a class="chip" href="/complaints/@complaint.Id/evidence/@evidence.Id">@evidence.OriginalFileName</a>
                     }
-                </ul>
+                </div>
             </section>
         }
 
@@ -68,30 +65,33 @@
     </div>
 
     <aside class="stack">
-        <div class="card">
-            <h2>Запросить уточнения</h2>
-            <form asp-controller="Moderation" asp-action="RequestDetails" asp-route-id="@complaint.Id" method="post">
-                <div class="field">
-                    <label for="details">Что нужно уточнить</label>
-                    <textarea id="details" name="details" required maxlength="2000"></textarea>
-                </div>
-                <button class="button button-secondary" type="submit">Запросить</button>
-            </form>
-        </div>
+        @if (complaint.Status != ComplaintStatus.Resolved)
+        {
+            <div class="card aside-sticky">
+                <h2>Запросить уточнения</h2>
+                <form asp-controller="Moderation" asp-action="RequestDetails" asp-route-id="@complaint.Id" method="post">
+                    <div class="field">
+                        <label for="details">Что нужно уточнить</label>
+                        <textarea id="details" name="details" required maxlength="2000"></textarea>
+                    </div>
+                    <button class="button button-secondary" type="submit">Запросить</button>
+                </form>
+            </div>
 
-        <div class="card">
-            <h2>Решение</h2>
-            <form asp-controller="Moderation" asp-action="Resolve" asp-route-id="@complaint.Id" method="post">
-                <div class="field">
-                    <label for="decision">Решение</label>
-                    <textarea id="decision" name="decision" required maxlength="2000"></textarea>
-                </div>
-                <div class="field">
-                    <label for="rationale">Обоснование</label>
-                    <textarea id="rationale" name="rationale" maxlength="2000"></textarea>
-                </div>
-                <button class="button" type="submit">Рассмотреть жалобу</button>
-            </form>
-        </div>
+            <div class="card">
+                <h2>Решение</h2>
+                <form asp-controller="Moderation" asp-action="Resolve" asp-route-id="@complaint.Id" method="post">
+                    <div class="field">
+                        <label for="decision">Решение</label>
+                        <textarea id="decision" name="decision" required maxlength="2000"></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="rationale">Обоснование</label>
+                        <textarea id="rationale" name="rationale" maxlength="2000"></textarea>
+                    </div>
+                    <button class="button" type="submit">Рассмотреть жалобу</button>
+                </form>
+            </div>
+        }
     </aside>
 </div>

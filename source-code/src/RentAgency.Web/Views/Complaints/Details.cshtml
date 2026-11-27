@@ -6,9 +6,9 @@
 
 <a class="link-quiet" asp-controller="Complaints" asp-action="Index">← Мои жалобы</a>
 
-<div class="section-head" style="margin-top:0.8rem">
+<div class="page-head" style="margin-top:0.8rem">
     <h1 style="margin:0">Жалоба</h1>
-    <span class="badge">@complaint.Status.ToRussian()</span>
+    <span class="badge @RentAgency.Web.Infrastructure.StatusBadge.For(complaint.Status)">@complaint.Status.ToRussian()</span>
 </div>
 
 <div class="stack">
@@ -23,12 +23,12 @@
     {
         <section class="card">
             <h2>Материалы</h2>
-            <ul>
+            <div class="chips">
                 @foreach (var evidence in complaint.Evidence)
                 {
-                    <li><a href="/complaints/@complaint.Id/evidence/@evidence.Id">@evidence.OriginalFileName</a></li>
+                    <a class="chip" href="/complaints/@complaint.Id/evidence/@evidence.Id">@evidence.OriginalFileName</a>
                 }
-            </ul>
+            </div>
         </section>
     }
 
@@ -37,7 +37,7 @@
 
         @if (complaint.History.Count == 0)
         {
-            <p class="empty">Модератор ещё не начал рассмотрение — здесь появятся уточнения и решение.</p>
+            <p class="empty">Пока без изменений.</p>
         }
         else
         {

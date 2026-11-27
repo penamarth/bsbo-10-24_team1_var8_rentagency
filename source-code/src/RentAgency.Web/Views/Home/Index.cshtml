@@ -1,59 +1,80 @@
 ﻿@model SearchPageViewModel
 @{
     ViewData["Title"] = "Аренда жилья";
+    var hasFilters = Model.Location is not null || Model.MaxPrice is not null || Model.Rooms is not null;
 }
 
-<section class="section">
-    <h1>Аренда жилья</h1>
+<div class="page-head">
+    <div>
+        <h1>Аренда жилья</h1>
+        <p class="page-sub">
+            @(Model.Results.Count == 0 ? "Пока ничего не найдено" : $"{Model.Results.Count} " + (Model.Results.Count % 10 == 1 && Model.Results.Count % 100 != 11 ? "предложение" : "предложений"))
+        </p>
+    </div>
+</div>
 
-    <form method="get" asp-controller="Home" asp-action="Index" class="search-bar">
-        <div class="field" style="margin-bottom:0">
-            <label for="location">Где</label>
-            <input id="location" name="location" value="@Model.Location" placeholder="Район или адрес" />
-        </div>
-        <div class="field" style="margin-bottom:0">
-            <label for="maxPrice">До, ₽ в месяц</label>
-            <input id="maxPrice" name="maxPrice" type="number" min="0" step="1000" value="@Model.MaxPrice" />
-        </div>
-        <div class="field" style="margin-bottom:0">
-            <label for="rooms">Комнат</label>
-            <input id="rooms" name="rooms" type="number" min="1" max="20" value="@Model.Rooms" />
-        </div>
-        <button class="button" type="submit">Найти</button>
-    </form>
-</section>
+<form method="get" asp-controller="Home" asp-action="Index" class="search-bar">
+    <div class="field" style="margin-bottom:0">
+        <label for="location">Где</label>
+        <input id="location" name="location" value="@Model.Location" placeholder="Район или адрес" />
+    </div>
+    <div class="field" style="margin-bottom:0">
+        <label for="maxPrice">До, ₽ в месяц</label>
+        <input id="maxPrice" name="maxPrice" type="number" min="0" value="@Model.MaxPrice" />
+    </div>
+    <div class="field" style="margin-bottom:0">
+        <label for="rooms">Комнат</label>
+        <input id="rooms" name="rooms" type="number" min="1" max="20" value="@Model.Rooms" />
+    </div>
+    <button class="button" type="submit">Найти</button>
+</form>
 
-@if (Model.Results.Count == 0)
+@if (hasFilters)
 {
-    var hasFilters = Model.Location is not null || Model.MaxPrice is not null || Model.Rooms is not null;
+    <div class="chips" style="margin: 0.9rem 0 0">
+        @if (Model.Location is not null)
+        {
+            <span class="chip">Где: @Model.Location</span>
+        }
+        @if (Model.MaxPrice is not null)
+        {
+            <span class="chip">До @Model.MaxPrice.Value.ToString("N0") ₽</span>
+        }
+        @if (Model.Rooms is not null)
+        {
+            <span class="chip">@Model.Rooms комн.</span>
+        }
+        <a class="chip" asp-controller="Home" asp-action="Index">Сбросить</a>
+    </div>
+}
 
-    if (hasFilters)
+<div style="margin-top: 1.4rem">
+    @if (Model.Results.Count == 0)
     {
-        <partial name="_EmptyState" model='("Под эти фильтры ничего не нашлось. Попробуйте расширить поиск.", "Сбросить фильтры", "Home", "Index")' />
+        <partial name="_EmptyState" model='(hasFilters
+            ? "По этим фильтрам ничего нет. Ослабьте условия поиска."
+            : "Активных объявлений пока нет. Загляните позже.",
+            hasFilters ? "Сбросить фильтры" : "", "Home", "Index")' />
     }
     else
     {
-        <partial name="_EmptyState" model='("Скоро здесь появятся объявления. Загляните позже.", "", "", "")' />
+        <div class="grid-cards">
+            @foreach (var listing in Model.Results)
+            {
+                <a class="listing-card" asp-controller="Listing" asp-action="Details" asp-route-id="@listing.ListingId">
+                    <span class="listing-card-media @(listing.CoverPhotoKey is null ? "is-empty" : "")">
+                        @if (listing.CoverPhotoKey is not null)
+                        {
+                            <img src="@PhotoUrls.Listing(listing.CoverPhotoKey)" alt="" loading="lazy" />
+                        }
+                    </span>
+                    <span class="listing-card-body">
+                        <span class="listing-price">@listing.Price.ToString("N0") ₽ <small class="listing-meta">в месяц</small></span>
+                        <span class="listing-address">@listing.Address</span>
+                        <span class="listing-meta">@listing.Rooms комн. · @listing.Area.ToString("0.#") м² · с @listing.AvailableFrom.ToString("dd.MM.yyyy")</span>
+                    </span>
+                </a>
+            }
+        </div>
     }
-}
-else
-{
-    <div class="grid-cards">
-        @foreach (var listing in Model.Results)
-        {
-            <a class="listing-card" asp-controller="Listing" asp-action="Details" asp-route-id="@listing.ListingId">
-                <span class="listing-card-media @(listing.CoverPhotoKey is null ? "is-empty" : null)">
-                    @if (listing.CoverPhotoKey is not null)
-                    {
-                        <img src="@PhotoUrls.Listing(listing.CoverPhotoKey)" alt="" loading="lazy" />
-                    }
-                </span>
-                <span class="listing-card-body">
-                    <span class="listing-price">@listing.Price.ToString("N0") ₽ <small class="listing-meta">в месяц</small></span>
-                    <span class="listing-address">@listing.Address</span>
-                    <span class="listing-meta">@listing.Rooms комн. · @listing.Area.ToString("0.#") м² · с @listing.AvailableFrom.ToString("dd.MM.yyyy")</span>
-                </span>
-            </a>
-        }
-    </div>
-}
+</div>
