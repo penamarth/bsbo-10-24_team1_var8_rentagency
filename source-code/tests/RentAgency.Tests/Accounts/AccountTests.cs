@@ -128,7 +128,13 @@ public class IdentitySeederTests
     [Fact]
     public async Task Seeder_IsIdempotentAndCreatesNoModeratorWithoutConfiguration()
     {
-        using var factory = new SqliteWebApplicationFactory();
+        using var factory = new SqliteWebApplicationFactory(new Dictionary<string, string?>
+        {
+            ["Identity:Moderator:Email"] = "",
+            ["Identity:Moderator:Password"] = "",
+            ["Identity:Moderator:Name"] = ""
+        });
+
         var configuration = new ConfigurationBuilder().Build();
 
         await IdentitySeeder.SeedAsync(factory.Services, configuration);

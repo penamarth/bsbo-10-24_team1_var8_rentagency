@@ -25,7 +25,16 @@
 
 @if (Model.Results.Count == 0)
 {
-    <p class="empty">Подходящих объявлений пока нет.</p>
+    var hasFilters = Model.Location is not null || Model.MaxPrice is not null || Model.Rooms is not null;
+
+    if (hasFilters)
+    {
+        <partial name="_EmptyState" model='("Под эти фильтры ничего не нашлось. Попробуйте расширить поиск.", "Сбросить фильтры", "Home", "Index")' />
+    }
+    else
+    {
+        <partial name="_EmptyState" model='("Скоро здесь появятся объявления. Загляните позже.", "", "", "")' />
+    }
 }
 else
 {
@@ -33,7 +42,7 @@ else
         @foreach (var listing in Model.Results)
         {
             <a class="listing-card" asp-controller="Listing" asp-action="Details" asp-route-id="@listing.ListingId">
-                <span class="listing-card-media">
+                <span class="listing-card-media @(listing.CoverPhotoKey is null ? "is-empty" : null)">
                     @if (listing.CoverPhotoKey is not null)
                     {
                         <img src="@PhotoUrls.Listing(listing.CoverPhotoKey)" alt="" loading="lazy" />

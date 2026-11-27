@@ -20,7 +20,7 @@
             Арендодатель: @Model.OwnerName · Арендатор: @Model.TenantName
         </p>
     </div>
-    <span class="badge">@request.Status.ToRussian()</span>
+    <span class="@StatusBadge.For(request.Status)">@request.Status.ToRussian()</span>
 </div>
 
 @if (request.RejectionReason is not null)
@@ -103,7 +103,7 @@
                 }
                 else
                 {
-                    <p class="badge badge-success">Условия согласованы</p>
+                    <p class="badge badge--success">Условия согласованы</p>
                 }
 
                 @if (bothTermsConfirmed && agreement.Status != AgreementStatus.Draft)
@@ -112,7 +112,7 @@
 
                     @if (agreement.Status == AgreementStatus.Completed)
                     {
-                        <p class="badge badge-success">Аренда завершена</p>
+                        <p class="badge badge--success">Аренда завершена</p>
                     }
                     else if (completionConfirmedByMe)
                     {

@@ -1,0 +1,11 @@
+@model (string Message, string LinkText, string Controller, string Action)
+
+<div class="empty-state">
+    <span class="empty-state__mark" aria-hidden="true"></span>
+    <p>@Model.Message</p>
+
+    @if (Model.LinkText != "" && Model.Controller != "" && Model.Action != "")
+    {
+        <a class="button button-secondary" asp-controller="@Model.Controller" asp-action="@Model.Action">@Model.LinkText</a>
+    }
+</div>

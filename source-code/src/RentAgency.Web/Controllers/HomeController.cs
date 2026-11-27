@@ -31,6 +31,24 @@ public class HomeController(ISearchService search) : Controller
         });
     }
 
+    [HttpGet("/Home/HandleStatus")]
+    public IActionResult HandleStatus(int code)
+    {
+        var originalPath = (HttpContext.Features[
+                typeof(Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature)]
+            as Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature)?.OriginalPath;
+
+        if (originalPath?.StartsWith("/media/", StringComparison.Ordinal) is true
+            || originalPath?.Contains("/evidence/", StringComparison.Ordinal) is true)
+        {
+            Response.StatusCode = code;
+            return new EmptyResult();
+        }
+
+        Response.StatusCode = code;
+        return View("StatusCode", code);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+<a class="skip-link" href="#content">К содержанию</a>
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    string Current(string controller, string action) =>
+        currentController == controller && currentAction == action ? "page" : null;
+}
 <header class="site-header">
     <div class="shell header-inner">
         <a class="brand" asp-controller="Home" asp-action="Index">
@@ -15,22 +22,22 @@
         </a>
 
         <nav class="site-nav" aria-label="Основная навигация">
-            <a asp-controller="Home" asp-action="Index">Поиск</a>
+            <a asp-controller="Home" asp-action="Index" aria-current="@Current("Home", "Index")">Поиск</a>
             @if (User.Identity?.IsAuthenticated is true)
             {
-                <a asp-controller="Rentals" asp-action="Index">Заявки</a>
+                <a asp-controller="Rentals" asp-action="Index" aria-current="@Current("Rentals", "Index")">Заявки</a>
                 @if (User.IsInRole(RentAgency.Web.Features.Accounts.UserRoles.Owner))
                 {
-                    <a asp-controller="Owner" asp-action="Index">Мои объявления</a>
+                    <a asp-controller="Owner" asp-action="Index" aria-current="@Current("Owner", "Index")">Мои объявления</a>
                 }
                 @if (User.IsInRole(RentAgency.Web.Features.Accounts.UserRoles.Moderator))
                 {
-                    <a asp-controller="Moderation" asp-action="Index">Модерация</a>
-                    <a asp-controller="Moderation" asp-action="Complaints">Жалобы</a>
+                    <a asp-controller="Moderation" asp-action="Index" aria-current="@Current("Moderation", "Index")">Модерация</a>
+                    <a asp-controller="Moderation" asp-action="Complaints" aria-current="@Current("Moderation", "Complaints")">Жалобы</a>
                 }
                 else
                 {
-                    <a asp-controller="Complaints" asp-action="Index">Жалобы</a>
+                    <a asp-controller="Complaints" asp-action="Index" aria-current="@Current("Complaints", "Index")">Жалобы</a>
                 }
                 <a asp-controller="Account" asp-action="Notifications">Уведомления</a>
             }
@@ -40,8 +47,10 @@
     </div>
 </header>
 
-<main class="shell main">
-    <partial name="_Alerts" />
+<main class="shell main" id="content" tabindex="-1">
+    <div aria-live="polite">
+        <partial name="_Alerts" />
+    </div>
     @RenderBody()
 </main>
 

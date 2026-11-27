@@ -1,0 +1,22 @@
+@model int
+@{
+    ViewData["Title"] = Model == 404 ? "Страница не найдена" : "Ошибка";
+    var isNotFound = Model == 404;
+}
+
+<div class="card status-page">
+    <span class="empty-state__mark" aria-hidden="true"></span>
+
+    @if (isNotFound)
+    {
+        <h1>Такой страницы нет</h1>
+        <p>Возможно, объявление сняли с публикации или ссылка устарела.</p>
+        <a class="button" asp-controller="Home" asp-action="Index">К поиску жилья</a>
+    }
+    else
+    {
+        <h1>Что-то пошло не так</h1>
+        <p>Код ошибки: @Model. Попробуйте повторить действие позже.</p>
+        <a class="button button-secondary" asp-controller="Home" asp-action="Index">На главную</a>
+    }
+</div>

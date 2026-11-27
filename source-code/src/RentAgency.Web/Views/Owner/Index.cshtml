@@ -10,11 +10,12 @@
 
 @if (Model.Listings.Count == 0)
 {
-    <p class="empty">Объявлений пока нет.</p>
+    <partial name="_EmptyState" model='("Объявлений пока нет.", "Разместить объявление", "Owner", "Create")' />
 }
 else
 {
-    <table class="section">
+    <div class="table-wrap" role="region" aria-label="Таблица данных" tabindex="0">
+<table class="section">
         <thead>
         <tr><th>Адрес</th><th>Цена</th><th>Статус</th><th>Версия</th><th></th></tr>
         </thead>
@@ -24,7 +25,7 @@ else
             <tr>
                 <td>@listing.Address</td>
                 <td>@listing.Price.ToString("N0") ₽</td>
-                <td><span class="badge">@listing.Status.ToRussian()</span></td>
+                <td><span class="@StatusBadge.For(listing.Status)">@listing.Status.ToRussian()</span></td>
                 <td class="muted">@listing.Version</td>
                 <td>
                     @if (listing.Status == ListingStatus.NeedsRevision)
@@ -40,6 +41,7 @@ else
         }
         </tbody>
     </table>
+</div>
 }
 
 <section class="section">
@@ -47,11 +49,12 @@ else
 
     @if (Model.Requests.Count == 0)
     {
-        <p class="empty">Заявок пока нет.</p>
+        <p class="empty">Заявок пока нет — они появятся, когда арендаторы откликнутся.</p>
     }
     else
     {
-        <table>
+        <div class="table-wrap" role="region" aria-label="Таблица данных" tabindex="0">
+<table>
             <thead>
             <tr><th>Жильё</th><th>Арендатор</th><th>Статус</th><th>Создана</th><th></th></tr>
             </thead>
@@ -61,12 +64,13 @@ else
                 <tr>
                     <td>@request.Address</td>
                     <td class="muted">@request.TenantId.ToString()[..8]</td>
-                    <td><span class="badge badge-muted">@request.Status.ToRussian()</span></td>
+                    <td><span class="@StatusBadge.For(request.Status)">@request.Status.ToRussian()</span></td>
                     <td>@request.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
                     <td><a asp-controller="Rentals" asp-action="Details" asp-route-id="@request.RequestId">Открыть</a></td>
                 </tr>
             }
             </tbody>
         </table>
+</div>
     }
 </section>

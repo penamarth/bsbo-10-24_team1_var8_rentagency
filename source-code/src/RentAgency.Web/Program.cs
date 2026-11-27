@@ -76,6 +76,8 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseStatusCodePagesWithReExecute("/Home/HandleStatus", "?code={0}");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
