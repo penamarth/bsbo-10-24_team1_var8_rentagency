@@ -138,6 +138,8 @@ public class AccountController(
             }
         }
 
+        await signInManager.RefreshSignInAsync(user);
+
         return RedirectToAction(nameof(BecomeOwner));
     }
 
