@@ -11,3 +11,4 @@ App_Data/
 .tmp/
 .cortexkit/
 *.user
+.opencode/
