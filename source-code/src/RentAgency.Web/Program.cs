@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RentAgency.Web.Data;
+using RentAgency.Web.Features;
 using RentAgency.Web.Features.Accounts;
 using RentAgency.Web.Features.Complaints;
 using RentAgency.Web.Features.Housing;
@@ -40,6 +41,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHousing();
 builder.Services.AddRentals();
 builder.Services.AddComplaints();
+builder.Services.AddScoped<RentAgencySystem>();
 
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 builder.Services.AddSingleton<IFileStorage>(serviceProvider =>
